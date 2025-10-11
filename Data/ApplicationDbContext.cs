@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using RChat.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace RChat.Data
 {
-    public class ApplicationDbContext : IdentityDbContext
+    public class ApplicationDbContext : IdentityDbContext<IdentityUser>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -17,14 +18,30 @@ namespace RChat.Data
         {
             base.OnModelCreating(builder);
 
-            // Configure the Message entity
+            // Configure the Message entity for PostgreSQL
             builder.Entity<Message>(entity =>
             {
+                entity.ToTable("Messages");
+
+                entity.HasKey(m => m.Id);
+
+                entity.Property(m => m.UserName)
+                    .IsRequired()
+                    .HasMaxLength(256);
+
+                entity.Property(m => m.Content)
+                    .IsRequired()
+                    .HasMaxLength(1000);
+
+                entity.Property(m => m.RoomName)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(m => m.Timestamp)
+                    .IsRequired();
+
                 entity.HasIndex(m => m.RoomName);
                 entity.HasIndex(m => m.Timestamp);
-                entity.Property(m => m.UserName).IsRequired().HasMaxLength(256);
-                entity.Property(m => m.Content).IsRequired().HasMaxLength(1000);
-                entity.Property(m => m.RoomName).IsRequired().HasMaxLength(100);
             });
         }
     }

@@ -6,15 +6,11 @@ using RChat.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add configuration
-builder.Configuration.AddEnvironmentVariables();
-
 // Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseNpgsql(connectionString));
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 {
@@ -34,15 +30,6 @@ builder.Services.AddSingleton<IUserTrackingService, UserTrackingService>();
 builder.Services.AddRazorPages();
 builder.Services.AddSignalR();
 
-// Add logging
-builder.Logging.ClearProviders();
-builder.Logging.AddConsole();
-
-if (builder.Environment.IsDevelopment())
-{
-    builder.Logging.AddDebug();
-}
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -54,12 +41,22 @@ else
 {
     app.UseExceptionHandler("/Error");
     app.UseHsts();
+}
 
-    // Ensure database is created and migrations are applied
-    using (var scope = app.Services.CreateScope())
+// Ensure database is created and migrations are applied
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+    try
     {
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         dbContext.Database.Migrate();
+        Console.WriteLine("Database migration completed successfully.");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Database migration failed: {ex.Message}");
+        // Don't throw - allow app to start even if migration fails
     }
 }
 
