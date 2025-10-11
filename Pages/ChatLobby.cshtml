@@ -1,0 +1,111 @@
+﻿@page
+@model RChat.Pages.ChatLobbyModel
+@{
+    ViewData["Title"] = "Chat Lobby";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h2>Chat Rooms</h2>
+            <p class="lead">Join a chat room to start chatting with others!</p>
+
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Available Rooms</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group">
+                                <a href="/Chat?room=General" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>General</strong> - General discussions
+                                    </div>
+                                    <span class="badge bg-primary rounded-pill" id="generalCount">0</span>
+                                </a>
+                                <a href="/Chat?room=Technology" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>Technology</strong> - Tech talks
+                                    </div>
+                                    <span class="badge bg-primary rounded-pill" id="techCount">0</span>
+                                </a>
+                                <a href="/Chat?room=Games" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>Games</strong> - Gaming discussions
+                                    </div>
+                                    <span class="badge bg-primary rounded-pill" id="gamesCount">0</span>
+                                </a>
+                                <a href="/Chat?room=Random" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>Random</strong> - Anything goes
+                                    </div>
+                                    <span class="badge bg-primary rounded-pill" id="randomCount">0</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Create Custom Room</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="get" asp-page="/Chat">
+                                <div class="form-group">
+                                    <label for="customRoom">Room Name</label>
+                                    <input type="text" class="form-control" id="customRoom" name="room" placeholder="Enter custom room name" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary mt-2">Join Room</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h6>Quick Stats</h6>
+                        </div>
+                        <div class="card-body">
+                            <small class="text-muted">
+                                <i class="fas fa-users"></i> <span id="totalUsers">0</span> users online<br>
+                                <i class="fas fa-comments"></i> <span id="activeRooms">0</span> active rooms
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Simple stats that don't use random numbers
+        function updateRoomStats() {
+            // For now, we'll show static counts since we don't have a proper API
+            // In a real app, you'd call a server endpoint to get real counts
+            const staticCounts = {
+                'General': 1,
+                'Technology': 0,
+                'Games': 0,
+                'Random': 0
+            };
+
+            document.getElementById('generalCount').textContent = staticCounts.General;
+            document.getElementById('techCount').textContent = staticCounts.Technology;
+            document.getElementById('gamesCount').textContent = staticCounts.Games;
+            document.getElementById('randomCount').textContent = staticCounts.Random;
+
+            const totalUsers = Object.values(staticCounts).reduce((a, b) => a + b, 0);
+            const activeRooms = Object.values(staticCounts).filter(count => count > 0).length;
+
+            document.getElementById('totalUsers').textContent = totalUsers;
+            document.getElementById('activeRooms').textContent = activeRooms;
+        }
+
+        // Update stats on page load
+        document.addEventListener('DOMContentLoaded', updateRoomStats);
+    </script>
+}

@@ -1,0 +1,153 @@
+﻿/* Chat Specific Styles */
+.chat-container {
+    max-height: 100vh;
+}
+
+.message-bubble {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    border: 1px solid rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+    .message-bubble:hover {
+        box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        transform: translateY(-1px);
+    }
+
+.bg-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+}
+
+#chatMessages {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    scroll-behavior: smooth;
+}
+
+.online-user {
+    transition: all 0.3s ease;
+}
+
+    .online-user:hover {
+        background-color: #f8f9fa !important;
+        transform: translateX(5px);
+    }
+
+/* Scrollbar styling */
+#chatMessages::-webkit-scrollbar {
+    width: 8px;
+}
+
+#chatMessages::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+#chatMessages::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+    #chatMessages::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
+
+/* Typing indicator animation */
+.typing-dots {
+    display: inline-block;
+}
+
+    .typing-dots::after {
+        content: '...';
+        animation: typing 1.5s infinite;
+    }
+
+@keyframes typing {
+    0%, 20% {
+        content: '.';
+    }
+
+    40% {
+        content: '..';
+    }
+
+    60%, 100% {
+        content: '...';
+    }
+}
+
+/* Connection status */
+.connection-status {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+
+    .connection-status.connected {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .connection-status.disconnected {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .connection-status.reconnecting {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .col-md-3 {
+        display: none;
+    }
+
+    .message-bubble {
+        max-width: 90% !important;
+    }
+
+    .mobile-hidden {
+        display: none !important;
+    }
+}
+
+/* Loading animation */
+.loading-spinner {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Message status indicators */
+.message-status {
+    font-size: 0.75rem;
+    opacity: 0.7;
+}
+
+.message-sent {
+    color: #28a745;
+}
+
+.message-pending {
+    color: #ffc107;
+}
+
+.message-failed {
+    color: #dc3545;
+}

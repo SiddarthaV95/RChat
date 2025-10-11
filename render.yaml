@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: rchat
+    env: dotnet
+    plan: free
+    branch: main
+    buildCommand: |
+      dotnet restore
+      dotnet publish -c Release -o ./publish
+    startCommand: cd ./publish && ./RChat
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ASPNETCORE_URLS
+        value: http://*:10000
+    disk:
+      name: data
+      mountPath: /app/Data
+      sizeGB: 1

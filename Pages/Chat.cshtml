@@ -1,0 +1,484 @@
+﻿@page
+@model RChat.Pages.ChatModel
+@{
+    ViewData["Title"] = "Chat Room";
+    var roomName = Request.Query["room"].FirstOrDefault() ?? "General";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2>Chat Room: <span id="roomName" class="badge bg-primary">@roomName</span></h2>
+                <div>
+                    <a href="/ChatLobby" class="btn btn-outline-secondary me-2">Change Room</a>
+                    <button id="toggleUsersBtn" class="btn btn-outline-info">Online Users</button>
+                </div>
+            </div>
+
+            <div class="alert alert-info d-flex justify-content-between align-items-center">
+                <div>
+                    Welcome, <strong>@User.Identity.Name</strong>! You're in the <strong>@roomName</strong> chat room.
+                </div>
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-success me-2" id="onlineCount">1</span> online
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Online Users Panel -->
+        <div class="col-md-3 mb-3">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">Online Users</h6>
+                    <span class="badge bg-primary" id="onlineUsersCount">1</span>
+                </div>
+                <div class="card-body">
+                    <ul id="onlineUsersList" class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            @User.Identity.Name
+                            <span class="badge bg-success rounded-pill">You</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Room Info Card -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0">Room Info</h6>
+                </div>
+                <div class="card-body">
+                    <small class="text-muted">Messages are persisted and will be available when you return.</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Chat Messages</span>
+                        <div id="typingIndicator" class="text-muted" style="display: none;">
+                            <i class="fas fa-pencil-alt"></i> <span id="typingUser"></span> is typing...
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div id="chatMessages" style="height: 500px; overflow-y: auto; padding: 15px; background-color: #f8f9fa;">
+                        <!-- Messages will appear here -->
+                        <div class="text-center text-muted">
+                            <em>Loading messages...</em>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="messageInput" placeholder="Type your message here..."
+                               aria-label="Message input" aria-describedby="sendButton" />
+                        <button type="button" class="btn btn-primary" id="sendButton">
+                            <i class="fas fa-paper-plane"></i> Send
+                        </button>
+                    </div>
+                    <small class="text-muted mt-2 d-block">
+                        Press Enter to send. Messages are saved automatically.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Add Bootstrap JS for toast functionality -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const roomName = '@roomName';
+        let connection = null;
+        let typingTimer = null;
+        let typingUsers = new Set();
+
+        // Define functions first so they're available everywhere
+        function updateConnectionStatus(status, message) {
+            // You can add a connection status indicator to your UI
+            console.log(`Connection status: ${status} - ${message}`);
+        }
+
+        function showError(message) {
+            // Create a Bootstrap toast notification for errors
+            const toast = document.createElement('div');
+            toast.className = 'toast align-items-center text-white bg-danger border-0 position-fixed top-0 end-0 m-3';
+            toast.style.zIndex = '1060';
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="fas fa-exclamation-triangle me-2"></i>${escapeHtml(message)}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            document.body.appendChild(toast);
+
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+
+            // Remove toast after it's hidden
+            toast.addEventListener('hidden.bs.toast', function () {
+                document.body.removeChild(toast);
+            });
+        }
+
+        function sendMessage() {
+            const messageInput = document.getElementById("messageInput");
+            const message = messageInput.value.trim();
+
+            if (message !== "" && connection.state === signalR.HubConnectionState.Connected) {
+                connection.invoke("SendMessage", roomName, message).catch(function (err) {
+                    console.error('Send error:', err.toString());
+                    showError('Failed to send message. Please try again.');
+                });
+                messageInput.value = "";
+                messageInput.focus();
+
+                // Clear typing indicator
+                clearAllTypingIndicators();
+            }
+        }
+
+        function addMessageToChat(user, message, timestamp) {
+            const chatMessages = document.getElementById("chatMessages");
+            const messageDiv = document.createElement("div");
+            messageDiv.className = "message mb-3";
+
+            const isCurrentUser = user === '@User.Identity.Name';
+            const messageAlignment = isCurrentUser ? 'end' : 'start';
+            const bgColor = isCurrentUser ? 'bg-primary text-white' : 'bg-white';
+
+            messageDiv.innerHTML = `
+                <div class="d-flex justify-content-${messageAlignment}">
+                    <div class="message-bubble ${bgColor} rounded p-3" style="max-width: 70%;">
+                        <div class="d-flex justify-content-between align-items-start mb-1">
+                            <strong class="${isCurrentUser ? 'text-white' : 'text-primary'}">${escapeHtml(user)}</strong>
+                            <small class="${isCurrentUser ? 'text-white-50' : 'text-muted'} ms-2">${formatTime(timestamp)}</small>
+                        </div>
+                        <div class="message-content">${escapeHtml(message)}</div>
+                    </div>
+                </div>
+            `;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function addSystemMessage(message) {
+            const chatMessages = document.getElementById("chatMessages");
+            const messageDiv = document.createElement("div");
+            messageDiv.className = "text-center text-muted my-2";
+            messageDiv.innerHTML = `<small><em>${escapeHtml(message)}</em></small>`;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function updateOnlineUsersList(users) {
+            const usersList = document.getElementById("onlineUsersList");
+            const currentUser = '@User.Identity.Name';
+
+            usersList.innerHTML = '';
+
+            users.forEach(user => {
+                const userItem = document.createElement("li");
+                userItem.className = "list-group-item d-flex justify-content-between align-items-center";
+                userItem.innerHTML = `
+                    ${escapeHtml(user)}
+                    ${user === currentUser ? '<span class="badge bg-success rounded-pill">You</span>' : ''}
+                `;
+                usersList.appendChild(userItem);
+            });
+
+            document.getElementById("onlineUsersCount").textContent = users.length;
+        }
+
+        function updateOnlineCount(count) {
+            document.getElementById("onlineCount").textContent = count;
+        }
+
+        function showTypingIndicator(user) {
+            typingUsers.add(user);
+            updateTypingIndicator();
+        }
+
+        function clearTypingIndicator(user) {
+            typingUsers.delete(user);
+            updateTypingIndicator();
+        }
+
+        function clearAllTypingIndicators() {
+            typingUsers.clear();
+            updateTypingIndicator();
+        }
+
+        function updateTypingIndicator() {
+            const indicator = document.getElementById("typingIndicator");
+            const typingUserSpan = document.getElementById("typingUser");
+
+            if (typingUsers.size > 0) {
+                const users = Array.from(typingUsers);
+                let text = '';
+
+                if (users.length === 1) {
+                    text = `${users[0]} is typing...`;
+                } else if (users.length === 2) {
+                    text = `${users[0]} and ${users[1]} are typing...`;
+                } else {
+                    text = `${users[0]} and ${users.length - 1} others are typing...`;
+                }
+
+                typingUserSpan.textContent = text;
+                indicator.style.display = 'block';
+            } else {
+                indicator.style.display = 'none';
+            }
+        }
+
+        function formatTime(date) {
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const messageDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+            if (messageDate.getTime() === today.getTime()) {
+                return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            } else if (messageDate.getTime() === today.getTime() - 86400000) {
+                return 'Yesterday ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            } else {
+                return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+        }
+
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            initializeSignalR();
+            initializeUI();
+        });
+
+        function initializeUI() {
+            // Toggle online users panel on mobile
+            document.getElementById('toggleUsersBtn').addEventListener('click', function() {
+                const usersPanel = document.querySelector('.col-md-3');
+                usersPanel.style.display = usersPanel.style.display === 'none' ? 'block' : 'none';
+            });
+
+            // Auto-focus message input
+            document.getElementById('messageInput').focus();
+        }
+
+        function initializeSignalR() {
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl("/chatHub")
+                .build();
+
+            // Message handling
+            connection.on("ReceiveMessage", function (user, message, timestamp) {
+                addMessageToChat(user, message, new Date(timestamp));
+                clearTypingIndicator(user);
+            });
+
+            // Load message history
+            connection.on("LoadMessageHistory", function (messages) {
+                const chatMessages = document.getElementById("chatMessages");
+                chatMessages.innerHTML = '';
+
+                if (messages.length === 0) {
+                    addSystemMessage('No previous messages in this room. Start the conversation!');
+                } else {
+                    messages.forEach(function (msg) {
+                        // Force UTC interpretation and convert to local time
+                        const utcTimestamp = msg.timestamp.endsWith('Z') ? msg.timestamp : msg.timestamp + 'Z';
+                        const localTimestamp = new Date(utcTimestamp);
+                        addMessageToChat(msg.userName, msg.content, localTimestamp);
+                    });
+                    addSystemMessage(`Loaded ${messages.length} previous messages`);
+                }
+
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            });
+
+            // User join/leave notifications
+            connection.on("UserJoined", function (user, room) {
+                addSystemMessage(`${user} joined the room`);
+            });
+
+            connection.on("UserLeft", function (user, room) {
+                addSystemMessage(`${user} left the room`);
+                clearTypingIndicator(user);
+            });
+
+            // Online users list updates
+            connection.on("UpdateOnlineUsers", function (users) {
+                updateOnlineUsersList(users);
+            });
+
+            connection.on("UpdateOnlineCount", function (count) {
+                updateOnlineCount(count);
+            });
+
+            // Typing indicators
+            connection.on("UserTyping", function (user, isTyping) {
+                if (isTyping) {
+                    showTypingIndicator(user);
+                } else {
+                    clearTypingIndicator(user);
+                }
+            });
+
+            // Room confirmation
+            connection.on("JoinedRoom", function (room) {
+                addSystemMessage(`You joined ${room}`);
+            });
+
+            // Enhanced error handling
+            connection.on("Error", function (errorMessage) {
+                showError(errorMessage);
+            });
+
+            // Connection state management
+            connection.onreconnecting(function () {
+                updateConnectionStatus('reconnecting', 'Reconnecting...');
+                addSystemMessage('Connection lost. Reconnecting...');
+            });
+
+            connection.onreconnected(function () {
+                updateConnectionStatus('connected', 'Connected');
+                addSystemMessage('Connection restored!');
+                // Rejoin room after reconnection
+                connection.invoke("JoinRoom", roomName).catch(function (err) {
+                    console.error('Error rejoining room after reconnect:', err.toString());
+                    showError('Failed to rejoin room after reconnection');
+                });
+            });
+
+            // Error handling
+            connection.onclose(function () {
+                updateConnectionStatus('disconnected', 'Disconnected');
+            });
+
+            connection.start().then(function () {
+                updateConnectionStatus('connected', 'Connected');
+                // Join the room after connection is established
+                connection.invoke("JoinRoom", roomName).catch(function (err) {
+                    console.error('Error joining room:', err.toString());
+                    showError('Failed to join room: ' + err.toString());
+                });
+            }).catch(function (err) {
+                console.error('Connection error:', err.toString());
+                updateConnectionStatus('error', 'Connection failed');
+                showError('Failed to connect to chat server: ' + err.toString());
+            });
+
+            // Send message functionality
+            document.getElementById("sendButton").addEventListener("click", sendMessage);
+
+            document.getElementById("messageInput").addEventListener("keypress", function (event) {
+                if (event.key === "Enter") {
+                    sendMessage();
+                }
+            });
+
+            // Enhanced typing indicators with throttling
+            let typingDebounceTimer;
+            document.getElementById("messageInput").addEventListener("input", function () {
+                if (connection.state === signalR.HubConnectionState.Connected) {
+                    // Clear existing timers
+                    if (typingDebounceTimer) clearTimeout(typingDebounceTimer);
+
+                    // Send typing started with debounce
+                    typingDebounceTimer = setTimeout(() => {
+                        connection.invoke("SendTypingNotification", roomName, true).catch(function (err) {
+                            console.error('Typing error:', err.toString());
+                        });
+                    }, 300);
+
+                    // Set timer to send typing stopped
+                    if (typingTimer) clearTimeout(typingTimer);
+                    typingTimer = setTimeout(function () {
+                        connection.invoke("SendTypingNotification", roomName, false).catch(function (err) {
+                            console.error('Typing error:', err.toString());
+                        });
+                    }, 1500);
+                }
+            });
+
+            // Clear typing when input loses focus
+            document.getElementById("messageInput").addEventListener("blur", function () {
+                if (connection.state === signalR.HubConnectionState.Connected) {
+                    connection.invoke("SendTypingNotification", roomName, false).catch(function (err) {
+                        console.error('Typing error:', err.toString());
+                    });
+                }
+            });
+        }
+    </script>
+
+    <style>
+        .message-bubble {
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .bg-primary {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+        }
+
+        #chatMessages {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+
+        .list-group-item {
+            border: none;
+            padding: 0.5rem 0.75rem;
+        }
+
+        /* Scrollbar styling */
+        #chatMessages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #chatMessages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        #chatMessages::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+
+            #chatMessages::-webkit-scrollbar-thumb:hover {
+                background: #a8a8a8;
+            }
+
+        /* Responsive design */
+        @@media (max-width: 768px) {
+            .col-md-3 {
+                display: none;
+            }
+
+            .message-bubble {
+                max-width: 90% !important;
+            }
+        }
+    </style>
+
+    <!-- Add Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+}
