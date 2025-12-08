@@ -4,75 +4,228 @@
     ViewData["Title"] = "Chat Lobby";
 }
 
-<div class="container">
-    <div class="row">
-        <div class="col-12">
-            <h2>Chat Rooms</h2>
-            <p class="lead">Join a chat room to start chatting with others!</p>
+<style>
+    body {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+        color: #e2e8f0;
+        min-height: 100vh;
+        margin: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-            <div class="row">
-                <div class="col-md-8">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>Available Rooms</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="list-group">
-                                <a href="/Chat?room=General" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <strong>General</strong> - General discussions
-                                    </div>
-                                    <span class="badge bg-primary rounded-pill" id="generalCount">0</span>
-                                </a>
-                                <a href="/Chat?room=Technology" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <strong>Technology</strong> - Tech talks
-                                    </div>
-                                    <span class="badge bg-primary rounded-pill" id="techCount">0</span>
-                                </a>
-                                <a href="/Chat?room=Games" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <strong>Games</strong> - Gaming discussions
-                                    </div>
-                                    <span class="badge bg-primary rounded-pill" id="gamesCount">0</span>
-                                </a>
-                                <a href="/Chat?room=Random" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <strong>Random</strong> - Anything goes
-                                    </div>
-                                    <span class="badge bg-primary rounded-pill" id="randomCount">0</span>
-                                </a>
+    .chat-lobby-container {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin: 2rem auto;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .lobby-title {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 700;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .lobby-subtitle {
+        color: #94a3b8;
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+    }
+
+    .room-card {
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        transition: all 0.3s ease;
+        margin-bottom: 1rem;
+    }
+
+        .room-card:hover {
+            transform: translateY(-5px);
+            border-color: #667eea;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        }
+
+    .room-link {
+        color: #e2e8f0 !important;
+        text-decoration: none;
+        padding: 1.5rem;
+        display: block;
+        transition: all 0.3s ease;
+    }
+
+        .room-link:hover {
+            color: #ffffff !important;
+        }
+
+    .room-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        font-size: 0.9rem;
+    }
+
+    .custom-room-card {
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 1.5rem;
+    }
+
+    .stats-card {
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .form-control {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #e2e8f0;
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+    }
+
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #667eea;
+            color: #e2e8f0;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        .form-control::placeholder {
+            color: #94a3b8;
+        }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 12px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+    .card-header {
+        background: rgba(255, 255, 255, 0.1);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        color: #e2e8f0;
+        font-weight: 600;
+    }
+
+    .text-muted {
+        color: #94a3b8 !important;
+    }
+
+    .list-group-item {
+        background: transparent;
+        border: none;
+        color: #e2e8f0;
+    }
+
+    /* Ensure container doesn't break layout */
+    .container {
+        max-width: 1200px !important;
+    }
+
+    /* Responsive design */
+    @@media (max-width: 768px) {
+        .chat-lobby-container {
+            margin: 1rem;
+            padding: 1.5rem;
+        }
+
+        .lobby-title {
+            font-size: 2rem;
+        }
+    }
+</style>
+
+<div class="chat-lobby-container">
+    <div class="text-center mb-5">
+        <h1 class="lobby-title">Chat Rooms</h1>
+        <p class="lobby-subtitle">Join a room or create your own to start chatting with others!</p>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="room-card">
+                <div class="card-header">
+                    <h5 class="mb-0">Available Rooms</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        <a href="/Chat?room=General" class="room-link d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>General</strong>
+                                <div class="text-muted small">General discussions and casual talk</div>
                             </div>
-                        </div>
+                            <span class="badge room-badge rounded-pill" id="generalCount">0</span>
+                        </a>
+                        <a href="/Chat?room=Technology" class="room-link d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>Technology</strong>
+                                <div class="text-muted small">Tech talks, programming, and gadgets</div>
+                            </div>
+                            <span class="badge room-badge rounded-pill" id="techCount">0</span>
+                        </a>
+                        <a href="/Chat?room=Games" class="room-link d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>Games</strong>
+                                <div class="text-muted small">Gaming discussions and reviews</div>
+                            </div>
+                            <span class="badge room-badge rounded-pill" id="gamesCount">0</span>
+                        </a>
+                        <a href="/Chat?room=Random" class="room-link d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>Random</strong>
+                                <div class="text-muted small">Anything and everything goes here</div>
+                            </div>
+                            <span class="badge room-badge rounded-pill" id="randomCount">0</span>
+                        </a>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <div class="col-md-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>Create Custom Room</h5>
-                        </div>
-                        <div class="card-body">
-                            <form method="get" asp-page="/Chat">
-                                <div class="form-group">
-                                    <label for="customRoom">Room Name</label>
-                                    <input type="text" class="form-control" id="customRoom" name="room" placeholder="Enter custom room name" required>
-                                </div>
-                                <button type="submit" class="btn btn-primary mt-2">Join Room</button>
-                            </form>
-                        </div>
+        <div class="col-lg-4">
+            <div class="custom-room-card">
+                <h5 class="mb-3">Create Custom Room</h5>
+                <form method="get" asp-page="/Chat">
+                    <div class="mb-3">
+                        <label for="customRoom" class="form-label">Room Name</label>
+                        <input type="text" class="form-control" id="customRoom" name="room"
+                               placeholder="Enter custom room name" required>
                     </div>
+                    <button type="submit" class="btn btn-primary w-100">Join Room</button>
+                </form>
+            </div>
 
-                    <div class="card mt-3">
-                        <div class="card-header">
-                            <h6>Quick Stats</h6>
-                        </div>
-                        <div class="card-body">
-                            <small class="text-muted">
-                                <i class="fas fa-users"></i> <span id="totalUsers">0</span> users online<br>
-                                <i class="fas fa-comments"></i> <span id="activeRooms">0</span> active rooms
-                            </small>
-                        </div>
+            <div class="stats-card">
+                <h6 class="mb-3">Quick Stats</h6>
+                <div class="text-muted">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-users me-2"></i>
+                        <span id="totalUsers">0</span> users online
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-comments me-2"></i>
+                        <span id="activeRooms">0</span> active rooms
                     </div>
                 </div>
             </div>
@@ -82,10 +235,7 @@
 
 @section Scripts {
     <script>
-        // Simple stats that don't use random numbers
         function updateRoomStats() {
-            // For now, we'll show static counts since we don't have a proper API
-            // In a real app, you'd call a server endpoint to get real counts
             const staticCounts = {
                 'General': 1,
                 'Technology': 0,
@@ -105,7 +255,6 @@
             document.getElementById('activeRooms').textContent = activeRooms;
         }
 
-        // Update stats on page load
         document.addEventListener('DOMContentLoaded', updateRoomStats);
     </script>
 }

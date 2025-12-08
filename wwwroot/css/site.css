@@ -20,3 +20,277 @@ html {
 body {
   margin-bottom: 60px;
 }
+/* Modern UI Styles for RChat */
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --dark-bg: #0f172a;
+    --card-bg: rgba(255, 255, 255, 0.1);
+    --glass-effect: rgba(255, 255, 255, 0.08);
+}
+
+/* Home Page Specific Styles */
+body.home-page {
+    background: var(--dark-bg);
+    color: #e2e8f0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+}
+
+body.other-page {
+    background: #f8f9fa;
+}
+
+/* Animated Background Elements - Only on Home Page */
+.floating-chat-bubbles {
+    position: absolute; /* Changed from fixed to absolute */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.chat-bubble {
+    position: absolute; /* Keep as absolute */
+    background: var(--glass-effect);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 15px 20px;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    animation: float 6s ease-in-out infinite;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.bubble-1 {
+    top: 20%;
+    left: 10%;
+    animation-delay: 0s;
+    background: var(--primary-gradient);
+}
+
+.bubble-2 {
+    top: 60%;
+    right: 10%;
+    animation-delay: 2s;
+    background: var(--secondary-gradient);
+}
+
+.bubble-3 {
+    top: 40%;
+    left: 20%;
+    animation-delay: 4s;
+}
+
+.bubble-4 {
+    bottom: 20%;
+    right: 20%;
+    animation-delay: 1s;
+}
+
+.bubble-5 {
+    top: 70%;
+    left: 15%;
+    animation-delay: 3s;
+}
+
+.bubble-6 {
+    top: 30%;
+    right: 15%;
+    animation-delay: 5s;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0) translateX(0) rotate(0deg);
+    }
+
+    25% {
+        transform: translateY(-20px) translateX(10px) rotate(2deg);
+    }
+
+    50% {
+        transform: translateY(-10px) translateX(-10px) rotate(-2deg);
+    }
+
+    75% {
+        transform: translateY(-15px) translateX(5px) rotate(1deg);
+    }
+}
+
+/* Modern Navigation - Fixed Colors */
+.navbar {
+    background: rgba(255, 255, 255, 0.98) !important;
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 1rem 0;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.8rem;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    transition: all 0.3s ease;
+}
+
+    .navbar-brand:hover {
+        transform: scale(1.05);
+    }
+
+/* Ensure nav links are visible on all pages */
+.navbar-nav .nav-link {
+    color: #2d3748 !important; /* Dark gray for good contrast */
+    font-weight: 600;
+    padding: 0.5rem 1rem !important;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    margin: 0 0.2rem;
+}
+
+    .navbar-nav .nav-link:hover {
+        color: #000 !important;
+        background: rgba(0, 0, 0, 0.05);
+        transform: translateY(-2px);
+    }
+
+/* Specific fix for home page nav links */
+.home-page .navbar-nav .nav-link {
+    color: #2d3748 !important; /* Force dark color even on home page */
+}
+
+    .home-page .navbar-nav .nav-link:hover {
+        color: #000 !important;
+        background: rgba(0, 0, 0, 0.05);
+    }
+
+/* Modern Cards for Home Page */
+.home-page .modern-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    color: white;
+}
+
+    .home-page .modern-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+
+/* Modern Buttons */
+.btn-modern {
+    background: var(--primary-gradient);
+    border: none;
+    border-radius: 10px;
+    padding: 12px 24px;
+    font-weight: 600;
+    color: white;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+    .btn-modern::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn-modern:hover::before {
+        left: 100%;
+    }
+
+    .btn-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+
+/* Home Page Text Colors */
+.home-page .text-dark {
+    color: #e2e8f0 !important;
+}
+
+.home-page .text-muted {
+    color: #94a3b8 !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .navbar-nav {
+        text-align: center;
+        margin: 1rem 0;
+    }
+
+    .nav-link {
+        margin: 0.2rem 0;
+    }
+
+    .chat-bubble {
+        font-size: 12px;
+        padding: 10px 15px;
+    }
+}
+
+/* Smooth Scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Custom Scrollbar for Home Page */
+.home-page ::-webkit-scrollbar {
+    width: 8px;
+}
+
+.home-page ::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.8);
+}
+
+.home-page ::-webkit-scrollbar-thumb {
+    background: var(--primary-gradient);
+    border-radius: 4px;
+}
+
+    .home-page ::-webkit-scrollbar-thumb:hover {
+        background: var(--secondary-gradient);
+    }
+/* Add this to your existing site.css */
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    margin-bottom: 60px; /* Height of the footer */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main {
+    flex: 1;
+}
+
+.footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    white-space: nowrap;
+    line-height: 60px;
+    background-color: #f8f9fa;
+}

@@ -1,64 +1,236 @@
 ﻿@page
 @model RegisterModel
+
 @{
     ViewData["Title"] = "Register";
 }
 
-<h1>@ViewData["Title"]</h1>
+<style>
+    /* Add this to both login and register page styles */
+    .navbar .container {
+        max-width: 1200px !important;
+        margin: 0 auto !important;
+        padding: 0 15px !important;
+    }
 
-<div class="row">
-    <div class="col-md-4">
+    main {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+    }
+
+    .register-page {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        margin: 0;
+    }
+
+    .register-container {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 3rem;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        max-width: 500px;
+        width: 90%;
+        margin: 0;
+    }
+
+    .register-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .register-title {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 700;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .register-subtitle {
+        color: #6c757d;
+        font-size: 1.1rem;
+    }
+
+    .form-floating {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-control {
+        border-radius: 12px;
+        border: 2px solid #e9ecef;
+        padding: 1rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+    .btn-register {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 12px;
+        padding: 1rem 2rem;
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: white;
+        transition: all 0.3s ease;
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+    .login-link {
+        text-align: center;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e9ecef;
+    }
+
+        .login-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+            .login-link a:hover {
+                color: #764ba2;
+            }
+
+    .validation-summary-errors {
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        color: #721c24;
+    }
+
+    .text-danger {
+        color: #dc3545 !important;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    .password-requirements {
+        background: #e7f3ff;
+        border: 1px solid #b3d9ff;
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        color: #0066cc;
+    }
+
+        .password-requirements h6 {
+            margin-bottom: 0.5rem;
+            color: #004d99;
+        }
+
+        .password-requirements ul {
+            margin-bottom: 0;
+            padding-left: 1.5rem;
+        }
+
+        .password-requirements li {
+            margin-bottom: 0.25rem;
+        }
+
+    /* Remove default container padding */
+    .container {
+        max-width: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    main {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* Responsive design */
+    @@media (max-width: 768px) {
+        .register-container {
+            margin: 1rem;
+            padding: 2rem;
+            width: 85%;
+        }
+
+        .register-title {
+            font-size: 2rem;
+        }
+    }
+</style>
+
+<div class="register-page">
+    <div class="register-container">
+        <div class="register-header">
+            <h1 class="register-title">Join RChat</h1>
+            <p class="register-subtitle">Create your account to start chatting</p>
+        </div>
+
         <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-            <h2>Create a new account.</h2>
-            <hr />
-            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+            <div asp-validation-summary="ModelOnly" class="validation-summary-errors" role="alert"></div>
+
             <div class="form-floating mb-3">
                 <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                <label asp-for="Input.Email">Email</label>
+                <label asp-for="Input.Email" class="form-label">Email</label>
                 <span asp-validation-for="Input.Email" class="text-danger"></span>
             </div>
+
             <div class="form-floating mb-3">
                 <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label asp-for="Input.Password">Password</label>
+                <label asp-for="Input.Password" class="form-label">Password</label>
                 <span asp-validation-for="Input.Password" class="text-danger"></span>
             </div>
+
             <div class="form-floating mb-3">
-                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label asp-for="Input.ConfirmPassword">Confirm Password</label>
+                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="confirm password" />
+                <label asp-for="Input.ConfirmPassword" class="form-label">Confirm Password</label>
                 <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
             </div>
-            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
+
+            <div class="password-requirements">
+                <h6>Password Requirements:</h6>
+                <ul>
+                    <li>At least 6 characters long</li>
+                    <li>At least one digit (0-9)</li>
+                    <li>At least one lowercase letter</li>
+                    <li>At least one unique character</li>
+                </ul>
+            </div>
+
+            <div>
+                <button id="registerSubmit" type="submit" class="btn btn-register">Create Account</button>
+            </div>
+
+            <div class="login-link">
+                <p>
+                    <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl">Already have an account? Sign in</a>
+                </p>
+            </div>
         </form>
-    </div>
-    <div class="col-md-6 col-md-offset-2">
-        <section>
-            <h3>Use another service to register.</h3>
-            <hr />
-            @{
-                if ((Model.ExternalLogins?.Count ?? 0) == 0)
-                {
-                    <div>
-                        <p>
-                            There are no external authentication services configured. See this <a href="https://go.microsoft.com/fwlink/?LinkID=532715">article
-                            about setting up this ASP.NET application to support logging in via external services</a>.
-                        </p>
-                    </div>
-                }
-                else
-                {
-                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
-                        <div>
-                            <p>
-                                @foreach (var provider in Model.ExternalLogins!)
-                                {
-                                    <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
-                                }
-                            </p>
-                        </div>
-                    </form>
-                }
-            }
-        </section>
     </div>
 </div>
 

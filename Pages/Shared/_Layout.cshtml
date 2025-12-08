@@ -23,7 +23,20 @@
     <!-- Add Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body>
+<body class="@(ViewContext.RouteData.Values["Page"]?.ToString() == "/Index" ? "home-page" : "other-page")">
+    @if (ViewContext.RouteData.Values["Page"]?.ToString() == "/Index")
+    {
+        <!-- Animated Chat Bubbles Background - Only on Home Page -->
+        <div class="floating-chat-bubbles">
+            <div class="chat-bubble bubble-1">Hello! 👋</div>
+            <div class="chat-bubble bubble-2">Welcome to RChat! 🚀</div>
+            <div class="chat-bubble bubble-3">Real-time messaging 💬</div>
+            <div class="chat-bubble bubble-4">Join rooms now! 🎯</div>
+            <div class="chat-bubble bubble-5">Connect instantly ⚡</div>
+            <div class="chat-bubble bubble-6">Start chatting! 💫</div>
+        </div>
+    }
+
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
@@ -35,13 +48,7 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
-                        </li>
-                        <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-page="/ChatLobby">Chat Rooms</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
                         </li>
                     </ul>
                     <partial name="_LoginPartial" />
