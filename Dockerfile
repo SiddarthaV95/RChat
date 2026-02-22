@@ -4,9 +4,14 @@
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER $APP_UID
 WORKDIR /app
-EXPOSE 8080
-EXPOSE 8081
 
+# Force ASP.NET Core to listen explicitly on port 8080 (recommended for containers)
+ENV ASPNETCORE_URLS=http://+:8080
+
+# Set environment to Production (good practice for ECS/Fargate)
+ENV ASPNETCORE_ENVIRONMENT=Production
+
+EXPOSE 8080
 
 # This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
@@ -23,8 +28,9 @@ FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./RChat.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-# This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
+# This stage is used in production or when running from VS in regular mode
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
 ENTRYPOINT ["dotnet", "RChat.dll"]

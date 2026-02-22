@@ -30,7 +30,9 @@ builder.Services.AddSingleton<IUserTrackingService, UserTrackingService>();
 builder.Services.AddRazorPages();
 builder.Services.AddSignalR();
 
+Console.WriteLine("App starting - before builder.Build()");
 var app = builder.Build();
+Console.WriteLine("App built - before app.Run()");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -60,7 +62,7 @@ else
 //    }
 //}
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
