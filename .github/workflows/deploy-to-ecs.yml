@@ -10,12 +10,11 @@ env:
   ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
   ECS_SERVICE: ${{ secrets.ECS_SERVICE }}
   ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
-  ECS_TASK_DEFINITION: rchat-task.json          # Must match your repo file name
+  ECS_TASK_DEFINITION: rchat-task.json          # Exact name - case sensitive!
   CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
 
 permissions:
   contents: read
-  id-token: write   # Optional but recommended if using OIDC later
 
 jobs:
   deploy:
@@ -23,8 +22,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout code (full repo)
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # Full history - helps with recent commits
+
+      - name: Debug - Show where we are and what files exist
+        run: |
+          echo "Current directory:"
+          pwd
+          echo ""
+          echo "Files in root (ls -la):"
+          ls -la
+          echo ""
+          echo "Looking for rchat-task.json specifically:"
+          ls rchat-task.json 2>/dev/null && echo "File FOUND!" || echo "File NOT FOUND"
+          echo ""
+          echo "Full find search:"
+          find . -name "*rchat*" -o -name "*task*" || echo "No matching files"
+          echo ""
+          if [ -f rchat-task.json ]; then
+            echo "File contents preview:"
+            cat rchat-task.json
+          fi
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -41,7 +61,7 @@ jobs:
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha }}   # Uses commit SHA as unique tag
+          IMAGE_TAG: ${{ github.sha }}
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
@@ -61,4 +81,4 @@ jobs:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           service: ${{ env.ECS_SERVICE }}
           cluster: ${{ env.ECS_CLUSTER }}
-          wait-for-service-stability: 'true'   # Waits until tasks are stable
+          wait-for-service-stability: 'true'
