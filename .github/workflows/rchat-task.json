@@ -1,5 +1,5 @@
 {
-    
+
   "family": "rchat-task",
   "networkMode": "awsvpc",
   "requiresCompatibilities": ["FARGATE"],
@@ -17,16 +17,8 @@
           "protocol": "tcp"
         }
       ],
-      "essential": true,
-      "logConfiguration": {
-        "logDriver": "awslogs",
-        "options": {
-          "awslogs-group": "/ecs/rchat-task",
-          "awslogs-region": "ap-south-2",
-          "awslogs-stream-prefix": "ecs",
-          "awslogs-create-group": "true"
-        }
-      }
+      "essential": true
+      
     }
   ]
 }
