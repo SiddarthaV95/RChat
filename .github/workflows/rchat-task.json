@@ -1,4 +1,5 @@
 {
+    
   "family": "rchat-task",
   "networkMode": "awsvpc",
   "requiresCompatibilities": ["FARGATE"],
