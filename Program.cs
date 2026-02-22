@@ -44,21 +44,21 @@ else
 }
 
 // Ensure database is created and migrations are applied
-using (var scope = app.Services.CreateScope())
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+//using (var scope = app.Services.CreateScope())
+//{
+//    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-    try
-    {
-        dbContext.Database.Migrate();
-        Console.WriteLine("Database migration completed successfully.");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Database migration failed: {ex.Message}");
-        // Don't throw - allow app to start even if migration fails
-    }
-}
+//    try
+//    {
+//        dbContext.Database.Migrate();
+//        Console.WriteLine("Database migration completed successfully.");
+//    }
+//    catch (Exception ex)
+//    {
+//        Console.WriteLine($"Database migration failed: {ex.Message}");
+//        // Don't throw - allow app to start even if migration fails
+//    }
+//}
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
