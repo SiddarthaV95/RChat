@@ -10,7 +10,7 @@ env:
   ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
   ECS_SERVICE: ${{ secrets.ECS_SERVICE }}
   ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
-  ECS_TASK_DEFINITION: rchat-task.json          # Exact name - case sensitive!
+  ECS_TASK_DEFINITION: .github/workflows/rchat-task.json       # Exact name - case sensitive!
   CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
 
 permissions:
