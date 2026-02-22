@@ -12,6 +12,8 @@ namespace RChat.Data
         {
         }
 
+        public DbSet<ChatRoom> ChatRooms { get; set; }
+
         public DbSet<Message> Messages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
